@@ -29,6 +29,9 @@ public class HystrixFluxMetricsPublisher extends HystrixMetricsPublisher {
     }
 
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public HystrixMetricsPublisherCommand getMetricsPublisherForCommand(HystrixCommandKey commandKey,
                                                                         HystrixCommandGroupKey commandGroupKey,
@@ -38,6 +41,9 @@ public class HystrixFluxMetricsPublisher extends HystrixMetricsPublisher {
         return new HystrixFluxMetricsPublisherCommand(commandKey, commandGroupKey, metrics, circuitBreaker, properties);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public HystrixMetricsPublisherThreadPool getMetricsPublisherForThreadPool(HystrixThreadPoolKey threadPoolKey,
                                                                               HystrixThreadPoolMetrics metrics,
@@ -45,6 +51,9 @@ public class HystrixFluxMetricsPublisher extends HystrixMetricsPublisher {
         return new HystrixFluxMetricsPublisherThreadPool(threadPoolKey, metrics, properties);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public HystrixMetricsPublisherCollapser getMetricsPublisherForCollapser(HystrixCollapserKey collapserKey,
                                                                             HystrixCollapserMetrics metrics,

@@ -27,19 +27,17 @@ public class HystrixFluxMetricsPublisherThreadPool extends HystrixFluxMetricsPub
     private final HystrixThreadPoolKey key;
     private final HystrixThreadPoolMetrics metrics;
     private final HystrixThreadPoolProperties properties;
-    private final Tag fluxInstanceTag;
-    private final Tag fluxTypeTag;
 
     public HystrixFluxMetricsPublisherThreadPool(HystrixThreadPoolKey threadPoolKey, HystrixThreadPoolMetrics metrics, HystrixThreadPoolProperties properties) {
         this.key = threadPoolKey;
         this.metrics = metrics;
         this.properties = properties;
 
-        this.fluxInstanceTag = new Tag() {
+        getTagList().add(new Tag() {
 
             @Override
             public String getKey() {
-                return "instance";
+                return "commandGroupKey";
             }
 
             @Override
@@ -52,8 +50,9 @@ public class HystrixFluxMetricsPublisherThreadPool extends HystrixFluxMetricsPub
                 return key.name();
             }
 
-        };
-        this.fluxTypeTag = new Tag() {
+        });
+
+        getTagList().add(new Tag() {
 
             @Override
             public String getKey() {
@@ -62,15 +61,15 @@ public class HystrixFluxMetricsPublisherThreadPool extends HystrixFluxMetricsPub
 
             @Override
             public String getValue() {
-                return "HystrixThreadPool";
+                return "HystrixMetricsPublisherThreadPool";
             }
 
             @Override
             public String tagString() {
-                return "HystrixThreadPool";
+                return "HystrixMetricsPublisherThreadPool";
             }
 
-        };
+        });
     }
 
     @Override
@@ -88,20 +87,9 @@ public class HystrixFluxMetricsPublisherThreadPool extends HystrixFluxMetricsPub
         RollingThreadPoolMaxConcurrencyStream.getInstance(key, properties).startCachingStreamValuesIfUnstarted();
     }
 
-    @Override
-    protected Tag getFluxTypeTag() {
-        return fluxTypeTag;
-    }
-
-    @Override
-    protected Tag getFluxInstanceTag() {
-        return fluxInstanceTag;
-    }
-
-
     /**
      *
-     * @return List<Monitor> con la estadística de hystrix.
+     * @return List<Monitor> con las estadísticas de hystrix.
      */
     private List<Monitor<?>> getMonitors() {
 
@@ -222,7 +210,7 @@ public class HystrixFluxMetricsPublisherThreadPool extends HystrixFluxMetricsPub
     }
 
     protected Monitor<Number> safelyGetCumulativeMonitor(final String name, final Func0<HystrixEventType.ThreadPool> eventThunk) {
-        return new CounterMetric(MonitorConfig.builder(name).withTag(getFluxTypeTag()).withTag(getFluxInstanceTag()).build()) {
+        return new CounterMetric(MonitorConfig.builder(name).build()) {
             @Override
             public Long getValue() {
                 return metrics.getCumulativeCount(eventThunk.call());
@@ -232,7 +220,7 @@ public class HystrixFluxMetricsPublisherThreadPool extends HystrixFluxMetricsPub
 
 
     protected Monitor<Number> safelyGetRollingMonitor(final String name, final Func0<HystrixEventType.ThreadPool> eventThunk) {
-        return new GaugeMetric(MonitorConfig.builder(name).withTag(DataSourceLevel.DEBUG).withTag(getFluxTypeTag()).withTag(getFluxInstanceTag()).build()) {
+        return new GaugeMetric(MonitorConfig.builder(name).withTag(DataSourceLevel.DEBUG).build()) {
             @Override
             public Long getValue() {
                 return metrics.getRollingCount(eventThunk.call());

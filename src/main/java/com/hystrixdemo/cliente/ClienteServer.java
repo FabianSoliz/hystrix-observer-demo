@@ -2,9 +2,7 @@ package com.hystrixdemo.cliente;
 
 
 import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.graphite.Graphite;
-import com.codahale.metrics.graphite.GraphiteReporter;
-import com.hystrixdemo.cliente.hystrix.Publisher;
+import com.hystrixdemo.cliente.hystrix.PublisherConfig;
 import com.netflix.hystrix.Hystrix;
 import com.netflix.hystrix.contrib.codahalemetricspublisher.HystrixCodaHaleMetricsPublisher;
 import com.netflix.hystrix.strategy.HystrixPlugins;
@@ -13,17 +11,11 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker;
-import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.cloud.netflix.hystrix.dashboard.EnableHystrixDashboard;
-import org.springframework.cloud.netflix.turbine.EnableTurbine;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.web.client.RestTemplate;
-
-
-import java.net.InetSocketAddress;
-import java.util.concurrent.TimeUnit;
 
 @SpringBootApplication
 //@EnableDiscoveryClient
@@ -47,7 +39,7 @@ public class ClienteServer {
 		Hystrix.reset();
 		HystrixPlugins.reset();
 
-		Publisher.getInstance().addFluxPublisher().addDataDogMetricObserver("demo").start(5000);
+		PublisherConfig.getInstance().addFluxPublisher().addDataDogMetricObserver("demo").start(5000);
 	}
 
 

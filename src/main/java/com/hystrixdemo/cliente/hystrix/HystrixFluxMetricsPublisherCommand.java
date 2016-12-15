@@ -26,23 +26,23 @@ public class HystrixFluxMetricsPublisherCommand extends HystrixFluxMetricsPublis
     private final HystrixCommandMetrics metrics;
     private final HystrixCircuitBreaker circuitBreaker;
     private final HystrixCommandProperties properties;
-    private final Tag fluxInstanceTag;
-    private final Tag fluxTypeTag;
 
-    public HystrixFluxMetricsPublisherCommand(HystrixCommandKey commandKey, HystrixCommandGroupKey commandGroupKey,
+
+    public HystrixFluxMetricsPublisherCommand(HystrixCommandKey commandKey, final HystrixCommandGroupKey commandGroupKey,
                                               HystrixCommandMetrics metrics, HystrixCircuitBreaker circuitBreaker,
                                               HystrixCommandProperties properties) {
+        super();
         this.key = commandKey;
         this.commandGroupKey = commandGroupKey;
         this.metrics = metrics;
         this.circuitBreaker = circuitBreaker;
         this.properties = properties;
 
-        this.fluxInstanceTag = new Tag() {
+        getTagList().add(new Tag() {
 
             @Override
             public String getKey() {
-                return "instance";
+                return "commandKey";
             }
 
             @Override
@@ -55,8 +55,28 @@ public class HystrixFluxMetricsPublisherCommand extends HystrixFluxMetricsPublis
                 return key.name();
             }
 
-        };
-        this.fluxTypeTag = new Tag() {
+        });
+
+        getTagList().add(new Tag() {
+
+            @Override
+            public String getKey() {
+                return "commandGroupKey";
+            }
+
+            @Override
+            public String getValue() {
+                return commandGroupKey.name();
+            }
+
+            @Override
+            public String tagString() {
+                return commandGroupKey.name();
+            }
+
+        });
+
+        getTagList().add(new Tag() {
 
             @Override
             public String getKey() {
@@ -65,32 +85,15 @@ public class HystrixFluxMetricsPublisherCommand extends HystrixFluxMetricsPublis
 
             @Override
             public String getValue() {
-                return "HystrixCommand";
+                return "HystrixMetricsPublisherCommand";
             }
 
             @Override
             public String tagString() {
-                return "HystrixCommand";
+                return "HystrixMetricsPublisherCommand";
             }
 
-        };
-    }
-
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected Tag getFluxTypeTag() {
-        return fluxTypeTag;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected Tag getFluxInstanceTag() {
-        return fluxInstanceTag;
+        });
     }
 
 
@@ -116,11 +119,27 @@ public class HystrixFluxMetricsPublisherCommand extends HystrixFluxMetricsPublis
 
     /**
      *
-     * @return List<Monitor> con la estadística de hystrix.
+     * @return List<Monitor> con las estadísticas de hystrix.
      */
     private List<Monitor<?>> getMonitors() {
 
         List<Monitor<?>> monitors = new ArrayList<Monitor<?>>();
+
+        // group
+        monitors.add(new InformationalMetric<String>(MonitorConfig.builder("commandGroup").build()) {
+            @Override
+            public String getValue() {
+                return commandGroupKey != null ? commandGroupKey.name() : null;
+            }
+        });
+
+        // commandkey
+        monitors.add(new InformationalMetric<String>(MonitorConfig.builder("commandKey").build()) {
+            @Override
+            public String getValue() {
+                return key != null ? key.name() : null;
+            }
+        });
 
         monitors.add(new InformationalMetric<Boolean>(MonitorConfig.builder("isCircuitBreakerOpen").build()) {
             @Override
@@ -318,13 +337,7 @@ public class HystrixFluxMetricsPublisherCommand extends HystrixFluxMetricsPublis
         monitors.add(getTotalLatencyPercentileMonitor("latencyTotal_percentile_99", 99));
         monitors.add(getTotalLatencyPercentileMonitor("latencyTotal_percentile_995", 99.5));
 
-        // group
-        monitors.add(new InformationalMetric<String>(MonitorConfig.builder("commandGroup").build()) {
-            @Override
-            public String getValue() {
-                return commandGroupKey != null ? commandGroupKey.name() : null;
-            }
-        });
+
 
         // properties (so the values can be inspected and monitored)
         monitors.add(new InformationalMetric<Number>(MonitorConfig.builder("propertyValue_rollingStatisticalWindowInMilliseconds").build()) {
@@ -446,7 +459,7 @@ public class HystrixFluxMetricsPublisherCommand extends HystrixFluxMetricsPublis
 
 
     protected Monitor<Number> safelyGetCumulativeMonitor(final String name, final Func0<HystrixEventType> eventThunk) {
-        return new CounterMetric(MonitorConfig.builder(name).withTag(getFluxTypeTag()).withTag(getFluxInstanceTag()).build()) {
+        return new CounterMetric(MonitorConfig.builder(name).build()) {
             @Override
             public Long getValue() {
                     HystrixEventType eventType = eventThunk.call();
@@ -456,7 +469,7 @@ public class HystrixFluxMetricsPublisherCommand extends HystrixFluxMetricsPublis
     }
 
     protected Monitor<Number> safelyGetRollingMonitor(final String name, final Func0<HystrixEventType> eventThunk) {
-        return new GaugeMetric(MonitorConfig.builder(name).withTag(DataSourceLevel.DEBUG).withTag(getFluxTypeTag()).withTag(getFluxInstanceTag()).build()) {
+        return new GaugeMetric(MonitorConfig.builder(name).withTag(DataSourceLevel.DEBUG).build()) {
             @Override
             public Long getValue() {
                     HystrixEventType eventType = eventThunk.call();

@@ -26,6 +26,19 @@ public class DatadogMetricObserver extends BaseMetricObserver {
         System.out.println("****DatadogMetricObserver***");
         System.out.println("Metrics size:" + metrics.size());
         for (Metric metric : metrics) {
+
+            if (metric.getConfig().getTags().getTag("commandKey") != null){
+               String tag = metric.getConfig().getTags().getTag("commandKey").getValue();
+                System.out.println("#####"+ tag +"######");
+            }
+            if (metric.getConfig().getTags().getTag("commandGroupKey") != null){
+                String tag = metric.getConfig().getTags().getTag("commandGroupKey").getValue();
+                System.out.println("#####"+ tag +"######");
+            }
+            if (metric.getConfig().getTags().getTag("type") != null){
+                String tag = metric.getConfig().getTags().getTag("type").getValue();
+                System.out.println("#####"+ tag +"######");
+            }
             System.out.println(metric.toString());
         }
 

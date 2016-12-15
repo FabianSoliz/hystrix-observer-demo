@@ -5,20 +5,42 @@ import com.netflix.servo.monitor.AbstractMonitor;
 import com.netflix.servo.monitor.Counter;
 import com.netflix.servo.monitor.Gauge;
 import com.netflix.servo.monitor.MonitorConfig;
+import com.netflix.servo.tag.BasicTagList;
 import com.netflix.servo.tag.Tag;
+import com.netflix.servo.tag.TagList;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Abstract Publisher Flux.
+ * Abstract PublisherConfig Flux.
  */
 public abstract class HystrixFluxMetricsPublisherAbstract {
 
-    protected abstract Tag getFluxTypeTag();
+    /**
+     * Listado de tags que se utilizarán para marcar las métricas recolectadas.
+     */
+    protected List<Tag> tagList;
 
-    protected abstract Tag getFluxInstanceTag();
+    public HystrixFluxMetricsPublisherAbstract() {
+        tagList = new ArrayList<Tag>();
+    }
 
+    public List<Tag> getTagList() {
+        return tagList;
+    }
+
+    public void setTagList(List<Tag> tagList) {
+        this.tagList = tagList;
+    }
+
+    /**
+     * Métrica con datos informativos que se marca con la tagList.
+     * @param <K> tipo de información que almacena la métrica.
+     */
     protected abstract class InformationalMetric<K> extends AbstractMonitor<K> {
         public InformationalMetric(MonitorConfig config) {
-            super(config.withAdditionalTag(DataSourceType.INFORMATIONAL).withAdditionalTag(getFluxTypeTag()).withAdditionalTag(getFluxInstanceTag()));
+            super(config.withAdditionalTag(DataSourceType.INFORMATIONAL).withAdditionalTags(new BasicTagList(getTagList())));
         }
 
         @Override
@@ -30,10 +52,13 @@ public abstract class HystrixFluxMetricsPublisherAbstract {
         public abstract K getValue();
     }
 
+    /**
+     * Counter Métrica que se marca con la tagList.
+     */
     protected abstract class CounterMetric extends AbstractMonitor<Number> implements Counter {
 
         public CounterMetric(MonitorConfig config) {
-            super(config.withAdditionalTag(DataSourceType.COUNTER).withAdditionalTag(getFluxTypeTag()).withAdditionalTag(getFluxInstanceTag()));
+            super(config.withAdditionalTag(DataSourceType.COUNTER).withAdditionalTags(new BasicTagList(getTagList())));
         }
 
         @Override
@@ -55,9 +80,12 @@ public abstract class HystrixFluxMetricsPublisherAbstract {
         }
     }
 
+    /**
+     * Gauge Métrica que se marca con la tagList.
+     */
     protected abstract class GaugeMetric extends AbstractMonitor<Number> implements Gauge<Number> {
         public GaugeMetric(MonitorConfig config) {
-            super(config.withAdditionalTag(DataSourceType.GAUGE).withAdditionalTag(getFluxTypeTag()).withAdditionalTag(getFluxInstanceTag()));
+            super(config.withAdditionalTag(DataSourceType.GAUGE).withAdditionalTags(new BasicTagList(getTagList())));
         }
 
         @Override

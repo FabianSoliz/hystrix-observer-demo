@@ -31,11 +31,7 @@ public class ClienteService {
 	}
 
 
-	@HystrixCommand(fallbackMethod = "getDtDefault",
-			commandProperties = {
-					@HystrixProperty(name = "metrics.rollingStats.numBuckets", value = "1"),
-					@HystrixProperty(name = "metrics.rollingStats.timeInMilliseconds", value = "60000")
-			})
+	@HystrixCommand(fallbackMethod = "getDtDefault", groupKey = "ungroupkey", commandKey = "uncommandey")
 	public Respuesta getDt(String name) {
 		return restTemplate.getForObject(serviceUrl + "/dt-seleccion/{name}", Respuesta.class, name);
 	}
@@ -60,7 +56,7 @@ public class ClienteService {
 	}
 
 
-	@HystrixCommand(fallbackMethod = "getDtDefault2")
+	@HystrixCommand(fallbackMethod = "getDtDefault2", groupKey = "ungroupkey2", commandKey = "uncommandey2")
 	public Respuesta getDt2(String name) {
 		return new RestTemplate().getForObject("http://localhost:8082/api/dt-seleccion/{name}", Respuesta.class, name);
 	}

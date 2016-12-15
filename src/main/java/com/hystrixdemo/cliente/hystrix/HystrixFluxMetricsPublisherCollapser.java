@@ -27,19 +27,17 @@ public class HystrixFluxMetricsPublisherCollapser extends HystrixFluxMetricsPubl
     private final HystrixCollapserKey key;
     private final HystrixCollapserMetrics metrics;
     private final HystrixCollapserProperties properties;
-    private final Tag fluxInstanceTag;
-    private final Tag fluxTypeTag;
 
     public HystrixFluxMetricsPublisherCollapser(HystrixCollapserKey threadPoolKey, HystrixCollapserMetrics metrics, HystrixCollapserProperties properties) {
         this.key = threadPoolKey;
         this.metrics = metrics;
         this.properties = properties;
 
-        this.fluxInstanceTag = new Tag() {
+        getTagList().add(new Tag() {
 
             @Override
             public String getKey() {
-                return "instance";
+                return "commandGroupKey";
             }
 
             @Override
@@ -52,8 +50,9 @@ public class HystrixFluxMetricsPublisherCollapser extends HystrixFluxMetricsPubl
                 return key.name();
             }
 
-        };
-        this.fluxTypeTag = new Tag() {
+        });
+
+        getTagList().add(new Tag() {
 
             @Override
             public String getKey() {
@@ -62,15 +61,15 @@ public class HystrixFluxMetricsPublisherCollapser extends HystrixFluxMetricsPubl
 
             @Override
             public String getValue() {
-                return "HystrixCollapser";
+                return "HystrixMetricsPublisherCollapser";
             }
 
             @Override
             public String tagString() {
-                return "HystrixCollapser";
+                return "HystrixMetricsPublisherCollapser";
             }
 
-        };
+        });
     }
 
     @Override
@@ -88,20 +87,9 @@ public class HystrixFluxMetricsPublisherCollapser extends HystrixFluxMetricsPubl
         CumulativeCollapserEventCounterStream.getInstance(key, properties).startCachingStreamValuesIfUnstarted();
     }
 
-    @Override
-    protected Tag getFluxTypeTag() {
-        return fluxTypeTag;
-    }
-
-    @Override
-    protected Tag getFluxInstanceTag() {
-        return fluxInstanceTag;
-    }
-
-
     /**
      *
-     * @return List<Monitor> con la estadística de hystrix.
+     * @return List<Monitor> con las estadísticas de hystrix.
      */
     private List<Monitor<?>> getMonitors() {
 
@@ -192,7 +180,7 @@ public class HystrixFluxMetricsPublisherCollapser extends HystrixFluxMetricsPubl
 
 
     protected Monitor<Number> getCumulativeMonitor(final String name, final HystrixEventType.Collapser event) {
-        return new CounterMetric(MonitorConfig.builder(name).withTag(getFluxTypeTag()).withTag(getFluxInstanceTag()).build()) {
+        return new CounterMetric(MonitorConfig.builder(name).build()) {
             @Override
             public Long getValue() {
                 return metrics.getCumulativeCount(event);
@@ -201,7 +189,7 @@ public class HystrixFluxMetricsPublisherCollapser extends HystrixFluxMetricsPubl
     }
 
     protected Monitor<Number> safelyGetCumulativeMonitor(final String name, final Func0<HystrixEventType.Collapser> eventThunk) {
-        return new CounterMetric(MonitorConfig.builder(name).withTag(getFluxTypeTag()).withTag(getFluxInstanceTag()).build()) {
+        return new CounterMetric(MonitorConfig.builder(name).build()) {
             @Override
             public Long getValue() {
                 return metrics.getCumulativeCount(eventThunk.call());
@@ -210,7 +198,7 @@ public class HystrixFluxMetricsPublisherCollapser extends HystrixFluxMetricsPubl
     }
 
     protected Monitor<Number> getRollingMonitor(final String name, final HystrixEventType.Collapser event) {
-        return new GaugeMetric(MonitorConfig.builder(name).withTag(DataSourceLevel.DEBUG).withTag(getFluxTypeTag()).withTag(getFluxInstanceTag()).build()) {
+        return new GaugeMetric(MonitorConfig.builder(name).withTag(DataSourceLevel.DEBUG).build()) {
             @Override
             public Long getValue() {
                 return metrics.getRollingCount(event);
@@ -219,7 +207,7 @@ public class HystrixFluxMetricsPublisherCollapser extends HystrixFluxMetricsPubl
     }
 
     protected Monitor<Number> safelyGetRollingMonitor(final String name, final Func0<HystrixEventType.Collapser> eventThunk) {
-        return new GaugeMetric(MonitorConfig.builder(name).withTag(DataSourceLevel.DEBUG).withTag(getFluxTypeTag()).withTag(getFluxInstanceTag()).build()) {
+        return new GaugeMetric(MonitorConfig.builder(name).withTag(DataSourceLevel.DEBUG).build()) {
             @Override
             public Long getValue() {
                 return metrics.getRollingCount(eventThunk.call());
