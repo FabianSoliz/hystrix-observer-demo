@@ -18,12 +18,12 @@ public class ClienteTest {
             switch (new Random().nextInt(5)) {
                 case 0: new RestTemplate().getForObject("http://localhost:8082/dt-seleccion/{name}", String.class, "343");
                         break;
-                case 1: new RestTemplate().getForObject("http://localhost:8082/dt-seleccion2/{name}", String.class, "343");
-                    break;
-                case 2: new RestTemplate().getForObject("http://localhost:8082/dt-seleccion-async/{name}", String.class, "343");
-                    break;
-                case 3: new RestTemplate().getForObject("http://localhost:8082/dt-seleccion-async2/{name}", String.class, "343");
-                    break;
+//                case 1: new RestTemplate().getForObject("http://localhost:8082/dt-seleccion2/{name}", String.class, "343");
+//                    break;
+//                case 2: new RestTemplate().getForObject("http://localhost:8082/dt-seleccion-async/{name}", String.class, "343");
+//                    break;
+//                case 3: new RestTemplate().getForObject("http://localhost:8082/dt-seleccion-async2/{name}", String.class, "343");
+//                    break;
 
             }
                 Thread.sleep(new Integer(new Random().nextInt(1000)).longValue());

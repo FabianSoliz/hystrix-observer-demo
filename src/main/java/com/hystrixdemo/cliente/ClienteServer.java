@@ -3,6 +3,8 @@ package com.hystrixdemo.cliente;
 
 import com.codahale.metrics.MetricRegistry;
 import com.hystrixdemo.cliente.hystrix.PublisherConfig;
+import com.netflix.config.DynamicBooleanProperty;
+import com.netflix.config.DynamicPropertyFactory;
 import com.netflix.hystrix.Hystrix;
 import com.netflix.hystrix.contrib.codahalemetricspublisher.HystrixCodaHaleMetricsPublisher;
 import com.netflix.hystrix.strategy.HystrixPlugins;
